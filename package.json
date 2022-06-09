@@ -1,10 +1,11 @@
 {
   "name": "xrplgraph",
+  "author": "https://github.com/Transia-RnD",
+  "version": "0.9.9",
   "scripts": {
     "build": "tsc",
     "serve": "npm run build && node lib/index.js",
-    "start": "node lib/index.js",
-    "deploy": "npm run build && gcloud app deploy"
+    "start": "node lib/index.js"
   },
   "main": "lib/index.js",
   "devDependencies": {

@@ -14,9 +14,8 @@ type IPFSResponse = {
 
 export const getIPFS = async (id: string) => {
   try {
-    // 👇️ const data: GetUsersResponse
     const { data, status } = await axios.get<IPFSResponse>(
-      `https://carbonland.mypinata.cloud/ipfs/${id}`,
+      `${process.env.IPFS_HTTPS_URL}/ipfs/${id}`,
       {
         headers: {
           Accept: 'application/json',
