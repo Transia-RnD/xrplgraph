@@ -13,9 +13,6 @@ import {
 } from 'apollo-server';
 // types
 import {
-  CarbonlandCredit
-} from './types/carbonland';
-import {
   XLS20Schema
 } from './types/ipfs';
 import {
@@ -23,9 +20,6 @@ import {
   NFTokenOffer
 } from './types/xrpl';
 // db
-import {
-  _g_carbonlandAccount,
-} from './services/carbonland';
 import {
   g_xrplGraph_pins,
 } from './services/xrplgraph';

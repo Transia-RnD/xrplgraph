@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { render } from "react-dom";
 import { styled } from '@mui/material/styles';
-import { Alert, Grid, Box, Stack, TextField } from '@mui/material';
+import { Alert, Grid, Box, Stack, TextField, Typography } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import ReactJson from 'react-json-view';
 import {
@@ -27,51 +27,50 @@ const AppStyle = styled(TextField)(({ theme }) => ({
   },
 }));
 
-// ipfs {
-//   schema
-//   nftType
-//   name
-// }
-// buy_offers {
-//   amount
-//   nft_offer_index
-// }
-// sell_offers {
-//   amount
-//   nft_offer_index
-// }
-
-// const GET_CARBONLAND_ACCOUNT = gql`
-//   query CarbonlandCredit {
-//     carbonland_account(account: "rMmAbcTBnZXFTwEXG2GiGrcQWDj9p7s25C") {
-//       ecoProject {
-//         URI
-//       }
-//     }
-//   }
-// `;
-const GET_ACCOUNT_MINTED = gql`
+const GET_CARBONLAND_ACCOUNT = (account) => gql`
+  query CarbonlandCredit {
+    carbonland_account(account: "${account}") {
+      ecoProject {
+        URI
+      }
+    }
+  }
+`;
+const GET_ACCOUNT_MINTED = (account) => gql`
   query AccountNFToken {
-    minted_nfts(account: "rsc5vNLRaQHnzRR6N6kgLRW436vACFz6gc") {
+    minted_nfts(account: "${account}") {
       NFTokenID
     }
   }
 `;
-const GET_ACCOUNT_NFTS = gql`
+const GET_ACCOUNT_NFTS = (account, taxon) => gql`
   query AccountNFToken {
-    account_nfts(account: "rMmAbcTBnZXFTwEXG2GiGrcQWDj9p7s25C", taxon: 0) {
+    account_nfts(account: "${account}", taxon: ${taxon || 0}) {
       Flags
       Issuer
       NFTokenID
       NFTokenTaxon
       URI
       nft_serial
+      ipfs {
+        schema
+        nftType
+        name
+      }
+      buy_offers {
+        amount
+        nft_offer_index
+      }
+      sell_offers {
+        amount
+        nft_offer_index
+      }
     }
   }
 `;
 
-function AccountNFTokenResults() {
-  const { loading, error, data } = useQuery(GET_ACCOUNT_MINTED);
+function AccountNFTokenResults({ account }) {
+  const { loading, error, data } = useQuery(GET_ACCOUNT_NFTS(account));
 
   if (loading) return <p>Loading...</p>;
   if (error) {
@@ -79,46 +78,89 @@ function AccountNFTokenResults() {
     console.log(error?.networkError?.result?.errors);
     return <Alert severity="error">{error.message}</Alert>
   };
-  // console.log(data.account_nfts);
-  console.log(data.minted_nfts);
   return (
-    <ReactJson
-      style={{overflow: 'scroll'}}
-      name={false}
-      theme="eighties"
-      src={data.minted_nfts}
-    />
+    <>
+      <Typography gutterBottom>
+        Account Owned
+      </Typography>
+      <ReactJson
+        style={{overflow: 'scroll'}}
+        name={false}
+        theme="eighties"
+        src={data.account_nfts}
+      />
+    </>
   )
 }
 
-const handleClick = () => {
-  console.log("SUBMIT");
+function AccountMinitedResults({ account }) {
+  const { loading, error, data } = useQuery(GET_ACCOUNT_MINTED(account));
+
+  if (loading) return <p>Loading...</p>;
+  if (error) {
+    return <Alert severity="error">{error.message}</Alert>
+  };
+  return (
+    <>
+      <Typography gutterBottom>
+        Account Minted
+      </Typography>
+      <ReactJson
+        style={{overflow: 'scroll'}}
+        name={false}
+        theme="eighties"
+        src={data.minted_nfts}
+      />
+    </>
+  )
 }
 
 function App() {
+  const [value, setValue] = useState('');
   const [isSubmitting, setSubmitting] = useState(false);
+  const [refresh, setRefresh] = useState(false);
+
+  const handleChange = (e) => {
+    const {
+      value
+    } = e.target;
+    console.log(value);
+    setValue(value);
+    setRefresh(false);
+  }
+
+  const handleSubmit = () => {
+    setRefresh(false);
+    setRefresh(true);
+  }
+
   return (
     <Grid p={8} container spacing={1}>
       <Grid item md={2}/>
       <Grid item md={8} >
-        <Stack fullWidth spacing={3}>
+        <Stack spacing={3}>
           <h2>🚀 XRPL Graph QL 🚀</h2>
-          <AppStyle id="account" label="Address" variant="outlined" />
+          <AppStyle value={value} onChange={handleChange} id="account" label="Address" variant="outlined" />
           <Box>
           <LoadingButton
-            fullWidth 
             size="large"
             variant="contained"
             sx={{
               height: 60,
             }}
+            disabled={refresh}
             loading={isSubmitting} 
-            onClick={handleClick} 
+            onClick={handleSubmit} 
           >
-            Get Account NFTokens
+            Run Query
           </LoadingButton>
           </Box>
-          <AccountNFTokenResults />
+          {refresh && value && (
+            <AccountNFTokenResults account={value} />
+          )}
+          {refresh && value && (
+            <AccountMinitedResults account={value} />
+          )}
         </Stack>
       </Grid>
       <Grid item md={2}/>
