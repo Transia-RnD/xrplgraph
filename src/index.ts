@@ -13,6 +13,9 @@ import {
 } from 'apollo-server';
 // types
 import {
+  CarbonlandCredit
+} from './types/carbonland';
+import {
   XLS20Schema
 } from './types/ipfs';
 import {
@@ -21,13 +24,21 @@ import {
 } from './types/xrpl';
 // db
 import {
-  _g_ipfs,
-} from './db/ipfs';
+  _g_carbonlandAccount,
+} from './services/carbonland';
 import {
+  g_xrplGraph_pins,
+} from './services/xrplgraph';
+import {
+  _g_ipfs,
+} from './services/ipfs';
+import {
+  _g_mintedNfts,
   _g_accountNfts,
+  AccountNFTFilter,
   _g_nftSellOffers,
   _g_nftBuyOffers
-} from './db/xrpl';
+} from './services/xrpl';
 // type defs
 import {
   typeDefs,
@@ -36,15 +47,36 @@ import {
 // INIT XRPL
 dotenv.config();
 const xrplApi = new Client(process.env.XRPL_CHAIN_WSS);
+
+g_xrplGraph_pins(xrplApi, process.env.XRPL_GRAPH_ACCOUNT);
+
 xrplApi.connect();
 
 const resolvers = {
   Query: {
-    async account_nfts(_: null, args: { account: string }) {
+    async minted_nfts(_: null, args: { account: string, taxon: number | undefined }) {
       try {
+        const filter: AccountNFTFilter = {
+          taxon: args.taxon
+        }
+        return await _g_mintedNfts(
+          xrplApi,
+          args.account,
+          filter
+        ) as AccountNFToken[] || new ValidationError('AccountNFTokens not found');
+      } catch (error) {
+        throw new ApolloError(error);
+      }
+    },
+    async account_nfts(_: null, args: { account: string, taxon: number | undefined }) {
+      try {
+        const filter: AccountNFTFilter = {
+          taxon: args.taxon
+        }
         return await _g_accountNfts(
           xrplApi,
-          args.account
+          args.account,
+          filter
         ) as AccountNFToken[] || new ValidationError('AccountNFTokens not found');
       } catch (error) {
         throw new ApolloError(error);

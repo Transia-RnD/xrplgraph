@@ -90,3 +90,6 @@ node_modules
 lib
 ipfs-*
 service-account.json
+credentials.json
+
+carbonland.*

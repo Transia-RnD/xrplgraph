@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "jsx": "react",
     "lib": ["es6", "dom", "esnext.asynciterable"],
     "module": "commonjs",
     "noImplicitReturns": false,
@@ -10,4 +11,4 @@
   },
   "compileOnSave": true,
   "include": ["src"]
-}
+} 

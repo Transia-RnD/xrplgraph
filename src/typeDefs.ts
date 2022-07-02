@@ -10,7 +10,7 @@ export const typeDefs = gql`
   type Attribute {
     name: String!
     description: String
-    value: String | Int
+    value: String
   }
   type XLS20Schema {
     schema: String!
@@ -36,7 +36,7 @@ export const typeDefs = gql`
     nft_serial: Int!
     buy_offers: [NFTokenOffer]!
     sell_offers: [NFTokenOffer]!
-    ipfs: IPFSv1Schema
+    ipfs: XLS20Schema
   }
   enum CacheControlScope {
     PUBLIC
@@ -48,6 +48,7 @@ export const typeDefs = gql`
     inheritMaxAge: Boolean
   ) on FIELD_DEFINITION | OBJECT | INTERFACE | UNION
   type Query {
-    account_nfts(account: String!): [AccountNFToken]
+    minted_nfts(account: String!, taxon: Int): [AccountNFToken]
+    account_nfts(account: String!, taxon: Int): [AccountNFToken]
   }
 `;
