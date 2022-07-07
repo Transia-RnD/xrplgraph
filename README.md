@@ -49,3 +49,6 @@ yarn install
 ```
 yarn run start
 ```
+
+gcloud config configurations activate metaxrplorer
+gcloud builds submit
